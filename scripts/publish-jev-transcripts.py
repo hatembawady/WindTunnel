@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Export redacted Jev traces from the two frozen cohort folders. No provider calls."""
-import argparse, gzip, hashlib, json, pathlib, re, subprocess
+import argparse, base64, gzip, hashlib, json, pathlib, re, subprocess
+from urllib.parse import quote, quote_plus
+
+if not __debug__: raise RuntimeError("Do not run publication checks with Python optimization enabled")
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RELEASE = ROOT / 'results/2026-09-18-jev-mercury'
 SECRET_KEY = re.compile(r'^(?:password|passwd|passphrase|authorization|proxy-authorization|cookie|set-cookie|api[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token|session[_-]?(?:token|id)|csrf[_-]?token|secret|client[_-]?secret)$', re.I)
 TOKEN = re.compile(r'\b(?:sk-(?:proj-|svcacct-|ant-api\d\d-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|hf_[A-Za-z0-9]{24,}|xox[baprs]-[A-Za-z0-9-]{16,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b')
-PERSONAL_PATH = re.compile(r'(?:file://)?/(?:Users|home)/[^\s"\'<>\\]+|/(?:private/)?tmp/[^\s"\'<>\\]+')
+PERSONAL_PATH = re.compile(r'(?<![A-Za-z0-9_./-])(?:file://)?/(?:Users|home)/[^\s"\'<>\\]+|(?<![A-Za-z0-9_./-])/(?:private/)?tmp/[^\s"\'<>\\]+')
 PRIVATE_IP = re.compile(r'(?<![\d.])(?:10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})(?![\d.])')
-PASSWORD = re.compile(r'password(?:\s*[:=]\s*|\s+(?:is\s+)?)[`"\']?([^\s,`"\']+)', re.I)
+PASSWORD = re.compile(r'\bwith\s+password(?:\s*[:=]\s*|\s+(?:is\s+)?)[`"\']?([^\s,`"\']+)', re.I)
 
 def embedded(s):
     if s.lstrip().startswith(('{','[')):
@@ -16,21 +19,27 @@ def embedded(s):
         except (ValueError,RecursionError): pass
     return None
 
-def collect(value, secrets):
+def secret_field(key,value):
+    # A tool schema describes a password field; it does not contain its value.
+    schema=isinstance(value,dict) and value.get("type") in ("string","number","integer","boolean","array","object","null") and set(value)<= {"type","description","title","format","minLength","maxLength","pattern","nullable"}
+    return bool(SECRET_KEY.fullmatch(key)) and not schema
+
+def collect(value, secrets, sensitive=False):
     if isinstance(value,dict):
-        for key,item in value.items():
-            if SECRET_KEY.fullmatch(key) and isinstance(item,str) and len(item)>=4:
-                secrets.add(item)
-            else: collect(item,secrets)
+        for key,item in value.items():collect(item,secrets,sensitive or secret_field(key,item))
     elif isinstance(value,list):
-        for item in value: collect(item,secrets)
+        for item in value:collect(item,secrets,sensitive)
     elif isinstance(value,str):
+        if sensitive and value and value!='[redacted]':
+            if len(value)<4:raise ValueError('Short sensitive value requires manual redaction before export')
+            secrets.add(value)
         nested=embedded(value)
-        if nested is not None: collect(nested,secrets)
+        if nested is not None:collect(nested,secrets,sensitive)
 
 class Redactor:
     def __init__(self,secrets):
-        self.secrets=sorted((s for s in secrets if s and s!='[redacted]'),key=len,reverse=True)
+        values={s for s in secrets if s and s!='[redacted]'}
+        self.secrets=sorted({encoded for s in values for encoded in (s,quote(s,safe=''),quote_plus(s,safe=''),base64.b64encode(s.encode()).decode())},key=len,reverse=True)
         self.redactions=0
     def text(self,s):
         original=s
@@ -41,16 +50,15 @@ class Redactor:
         s=PRIVATE_IP.sub('[redacted private IP]',s)
         self.redactions+=s!=original
         return s
-    def clean(self,value):
+    def clean(self,value,sensitive=False):
         if isinstance(value,dict):
             result={}
             for key,item in value.items():
-                if SECRET_KEY.fullmatch(key) and isinstance(item,str):
-                    result[key]='[redacted]';self.redactions+=1
-                else:result[key]=self.clean(item)
+                result[key]=self.clean(item,sensitive or secret_field(key,item))
             return result
-        if isinstance(value,list):return [self.clean(x) for x in value]
+        if isinstance(value,list):return [self.clean(x,sensitive) for x in value]
         if isinstance(value,str):
+            if sensitive:self.redactions+=1;return '[redacted]'
             nested=embedded(value)
             if nested is not None:return json.dumps(self.clean(nested),ensure_ascii=False,separators=(',',':'))
             return self.text(value)

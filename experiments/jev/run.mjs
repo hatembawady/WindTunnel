@@ -46,6 +46,7 @@ try{
     rows.push(row);fs.writeFileSync(path.join(out,`${rows.length}.json`),JSON.stringify(row,null,2)+'\n',{mode:0o600});
     // Stop on drift/unknown accounting; never silently pool or automatically rerun it.
     stopped = !!row.transcript?.some(e=>e.cost_unknown||(e.model_snapshot&&!['jev-1.13.0','mercury-2.5'].includes(e.model_snapshot)))||/harness-infra:/.test(row.failure_category??'')||!!row.context_close_error;
+    if(stopped)console.error(`Stopped after ${row.run_id}: model drift, unknown cost or infrastructure failure; inspect the saved attempt.`);
     return !stopped;
    }});
   if(batch.teardown_error)throw Error(batch.teardown_error);
@@ -55,3 +56,4 @@ try{
  await browser.close();
  fs.writeFileSync(path.join(out,'run.json'),JSON.stringify({options:{reproduction:true,interface:args.interface,automatic_retries:false},rows},null,2)+'\n',{mode:0o600});
 }
+if(stopped)process.exitCode=1;

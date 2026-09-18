@@ -9,7 +9,7 @@
 
 **Benchmark WebMCP against other methods browser agents use to interact with websites.**
 
-**WebMCP delivers up to 5.5× faster execution, 23× lower cost, and 12.5× fewer tokens—while solving 100% of tasks.**
+**WebMCP solves 100% of tasks, with 2.5–7.5× faster median execution, 3–47× lower median cost, and 27–50% higher scores than the median of other methods.**
 
 [Quick start](#quick-start) · [Results](#results) · [Run data](results/) · [Methodology](docs/SPEC.md) · [Cost](#cost) · [WebMCP spec](https://github.com/webmachinelearning/webmcp)
 
@@ -17,7 +17,7 @@
 [![benchmark](https://img.shields.io/badge/benchmark-49%20tasks%20%C3%97%208%20sites-a9c1a0?style=flat-square&labelColor=2f3336)](tasks/)
 [![built on](https://img.shields.io/badge/built%20on-WebMCP-a9c1a0?style=flat-square&labelColor=2f3336)](https://github.com/webmachinelearning/webmcp)
 [![tests](https://img.shields.io/github/actions/workflow/status/nekuda-ai/WindTunnel/test.yml?branch=main&style=flat-square&label=tests&color=a9c1a0&labelColor=2f3336)](https://github.com/nekuda-ai/WindTunnel/actions/workflows/test.yml)
-[![results](https://img.shields.io/badge/results-19%20configurations%20%C2%B7%202%2C793%20attempts-eaa47c?style=flat-square&labelColor=2f3336)](#results)
+[![results](https://img.shields.io/badge/results-21%20configurations%20%C2%B7%203%2C087%20attempts-eaa47c?style=flat-square&labelColor=2f3336)](#results)
 
 </div>
 
@@ -64,14 +64,16 @@ A browser agent can operate a website through four main interfaces:
 
 ## Results
 
-**Canonical board v1.1: 2026-09-06** — 19 configurations × 49 tasks across 8
-sites × 3 attempts = **2,793 attempt rows** and **931 majority verdicts**, with
-a 600s per-attempt cap. What changed since v1.0: [CHANGELOG.md](CHANGELOG.md).
+**Canonical board v1.2: 2026-09-18** — 21 configurations × 49 tasks across 8
+sites × 3 attempts = **3,087 attempt rows** and **1,029 majority verdicts**, with
+a 600s per-attempt cap. What changed since v1.1: [CHANGELOG.md](CHANGELOG.md).
 
-**Nine configurations solve 49/49 tasks:** all eight WebMCP configurations and
+**Ten configurations solve 49/49 tasks:** all nine WebMCP configurations and
 GPT-6 Astra on code execution, OpenAI's recommended computer-use mode. Raw
 task-solve rate therefore does not separate WebMCP from the best screen-driving
 configuration; cost and time do.
+
+**New: Jev + Mercury 2.5** solves **49/49 tasks with WebMCP** and **25/49 with ultrafast DOM controls**, without WebMCP. WebMCP leads the composite score and is 1.7× faster for this pair. The page setup costs less per median attempt ($0.0008 vs. $0.0011), but succeeds less often.
 
 **Five configurations pass every attempt (147/147):** Gemini 3.6 Flash,
 Sonnet 5 (native and Stagehand v4) and Claude Opus 5 via WebMCP, and GPT-6
@@ -81,7 +83,7 @@ median agent time was **16.4s vs. 6.3s**.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/charts/balanced-leaderboard-dark.svg">
-  <img src="assets/charts/balanced-leaderboard.svg" alt="WindTunnel leaderboard: 19 model/interface configurations ranked by a composite of attempt success, median cost and median agent time. The eight WebMCP configurations hold the top eight places; GPT-6 Astra on code execution is the best screen-driving configuration, tenth, with a perfect 49/49." width="100%">
+  <img src="assets/charts/balanced-leaderboard.svg" alt="WindTunnel leaderboard: 21 configurations ranked by attempt success, median cost and time. Jev + Mercury 2.5 with WebMCP ranks first. All nine WebMCP configurations lead the board; Jev + Mercury 2.5 DOM controls ranks twelfth." width="100%">
 </picture>
 
 <sub>Regenerate with `node scripts/readme-charts.mjs` — it reads `results/canonical` and fails if any label would overflow its column.</sub>
@@ -93,6 +95,7 @@ Canonical artifacts — [CSV](results/canonical/results.csv),
 
 | Configuration | Interface | Solved | Attempts | Turn-cap | Median cost | Median tokens | Median s |
 |---|---|---:|---:|---:|---:|---:|---:|
+| Jev + Mercury 2.5 | WebMCP | 49/49 | 141/147 | 0 | $0.0011 | 9,793 | 3.2 |
 | GPT-5.6 Luna · native | WebMCP | 49/49 | 146/147 | 0 | $0.002 | 2,596 | 5.7 |
 | Gemini 3.6 Flash · Stagehand v4 | WebMCP | 49/49 | 146/147 | 0 | $0.004 | 4,371 | 8.0 |
 | Gemini 3.6 Flash · native | WebMCP | 49/49 | 147/147 | 0 | $0.004 | 4,453 | 7.2 |
@@ -112,6 +115,7 @@ Canonical artifacts — [CSV](results/canonical/results.csv),
 | Sonnet 5 | a11y tree | 42/49 | 128/147 | 29 | $0.038 | 10,762 | 37.5 |
 | GPT-5.6 Luna | a11y tree | 40/49 | 119/147 | 38 | $0.020 | 18,517 | 16.0 |
 | Sonnet 5 | computer use | 39/49 | 119/147 | 41 | $0.070 | 57,701 | 31.7 |
+| Jev + Mercury 2.5 | DOM (ultrafast) | 25/49 | 76/147 | 19 | $0.0008 | 13,892 | 5.4 |
 
 <sub>Attempts are successful attempts out of 147; Turn-cap counts attempts
 that used every turn of their model-turn budget (whether or not the final turn
@@ -120,13 +124,12 @@ produced an answer). Medians are rounded by the chart generator (JavaScript
 uncached input + cache reads + cache writes + output. The table reports tasks
 solved by a majority of three attempts; infrastructure rows are excluded.</sub>
 
-<sub>The headline multiples are maximum same-model ratios: Sonnet 5 on the
-a11y tree vs. native WebMCP for time (37.5s / 6.8s), and Sonnet 5 on DOM +
-vision vs. native WebMCP for cost ($0.210 / $0.009) and tokens (64,424 /
-5,172).</sub>
+<sub>Headline ranges compare each WebMCP configuration with the median of all
+non-WebMCP configurations: 24.03s, $0.05024, and a composite score of 64.4.
+Each configuration has equal weight; time and cost include failed attempts.</sub>
 
-**Turn budgets are a material separator.** None of the **1,176 WebMCP
-attempts** hit the turn budget, versus **192 of 1,617 screen-driving attempts**.
+**Turn budgets are a material separator.** None of the **1,323 WebMCP
+attempts** hit the turn budget, versus **211 of 1,764 screen-driving attempts**.
 Matched like-for-like — each model's native WebMCP run against its own
 computer-use run, 882 attempts per side — the count is **0 vs. 124**. The
 screen-driving arms are given roughly 3× larger budgets because a screenshot
@@ -138,6 +141,8 @@ rows use `snapshot_source: unavailable:<harness>`. The configured model is
 confirmed out of band with [`scripts/verify-model.mjs`](scripts/verify-model.mjs).
 
 ### How the advantage scales with journey length
+
+The following table covers the six native WebMCP/screenshot model pairs; it excludes Jev's page-control setup.
 
 | Tier | Tasks | WebMCP solved | Computer use solved | Cheaper | Faster | Lighter |
 |---|---:|---:|---:|---:|---:|---:|
@@ -171,8 +176,8 @@ framework, and turn budget.
   inspects the resulting application state — is the item in the cart, does the
   appointment exist — and records pass or fail, plus what the attempt cost.
 - **Integrity.** Checked values are generated fresh from a seed, state-changing
-  tasks are scored by inspecting the application, and every transcript is
-  published so any answer can be audited. Memorization risk and its limits:
+  tasks are scored by inspecting the application, and published final answers are redacted. Raw transcripts are omitted from
+  the current release to keep login details out of the artifacts. Memorization risk and its limits:
   [`docs/SPEC.md`](docs/SPEC.md).
 - **Scorer correction.** Independent review found that the canonical merge had
   been built before corrected predicates were applied. Re-scoring fixed 19
@@ -216,13 +221,15 @@ Each task also carries a per-interface turn budget — a screenshot agent needs
 
 ## The methods
 
-The canonical benchmark spans 11 implementations and 19 model-interface
-configurations across Sonnet 5, Opus 5, GPT-5.6 Luna, GPT-5.6 SOL, GPT-6 Astra,
-and Gemini 3.6 Flash. Eight configurations use WebMCP and eleven use
-screen-driving interfaces — screenshots, page structure, and, for GPT-6 Astra,
-OpenAI's recommended code-execution mode, in which the model writes Playwright
-code against the page (reported as its own interface class). Every
-configuration uses the same 49 tasks, sites, scoring, and three attempts.
+The board spans 13 implementations and 21 configurations: nine with WebMCP
+and twelve using screenshots, page structure, or code execution. Models include
+Sonnet 5, Opus 5, GPT-5.6 Luna, GPT-5.6 SOL, GPT-6 Astra, Gemini 3.6 Flash,
+and Jev + Mercury 2.5. Every configuration uses the same 49 tasks and scoring.
+
+Jev makes decisions; Mercury writes arguments or field values and the final answer.
+The WebMCP and ultrafast page setups use separate frozen harnesses, so this is a
+comparison of complete setups. Their results are published here; their experimental
+runners are not part of the standard CLI. [Versions and accounting](results/2026-09-18-jev-mercury/PROVENANCE.md).
 
 ## Cost
 
@@ -235,19 +242,20 @@ interface:
   the whole page re-read each step. DOM + vision sends the text *and* a
   screenshot, and is often the heaviest configuration of all.
 - **WebMCP** — a short list of tool schemas plus small JSON results. No page
-  text, no screenshots. Lightest by far.
+  text, no screenshots. Usually less context.
 
 **Task length multiplies it.** Page-reading interfaces grow fastest because
 they re-read the page each step. Across the native model pairs, WebMCP's median
 cost advantage grows from about 6× on short tasks to 11–13× on longer journeys.
 
-**Per-task medians** across the current 19-configuration leaderboard (tokens
+**Per-task medians** across the current 21-configuration leaderboard (tokens
 include cache reads and cache writes; pricing detail in
 [`docs/SPEC.md`](docs/SPEC.md)):
 
 | Interface | Configurations | Median tokens / task | Median cost / task |
 |---|---:|---:|---:|
-| WebMCP | 8 | 2,573–5,172 | $0.002–$0.017 |
+| WebMCP | 9 | 2,573–9,793 | $0.0011–$0.017 |
+| DOM (ultrafast) | 1 | 13,892 | $0.0008 |
 | Computer use | 6 | 16,235–57,701 | $0.017–$0.261 |
 | Code execution | 1 | 10,982 | $0.119 |
 | Accessibility tree | 2 | 10,762–18,517 | $0.020–$0.038 |
@@ -258,10 +266,10 @@ attempts in each configuration, not an observed 1,000-run experiment:
 
 | Interface | Range | Median |
 |---|---:|---:|
-| WebMCP | $2.82–$22.67 | $10.72 |
-| Screen-driving | $35.05–$453.68 | $121.34 |
+| WebMCP | $1.37–$22.67 | $10.65 |
+| Screen-driving | $1.67–$453.68 | $120.01 |
 
-The projected ranges do not overlap.
+These ranges overlap. Costs use reported usage; unknown usage and excluded infrastructure spend for the new setups are disclosed in their provenance.
 
 **What a run costs:**
 
@@ -270,7 +278,7 @@ The projected ranges do not overlap.
 | quick check | `--preset smoke --sites lite` — 3 light sites, 1 attempt each | under $1 |
 | small | `--preset lite --sites lite` — the lite task set × 3 attempts | $5–10 |
 | full paired model (measured additions) | all 8 sites, 49 tasks × 3 attempts × WebMCP + computer use | ~$6–70 |
-| full canonical leaderboard (measured) | all 8 sites, 49 tasks × 3 attempts × 19 configurations | $281.35 |
+| full canonical leaderboard (measured) | all 8 sites, 49 tasks × 3 attempts × 21 configurations | $281.80 |
 
 In the former 2026-07-27 reference flight, the three WebMCP methods were ~9%
 of the bill; historical breakdown:
@@ -279,7 +287,7 @@ of the bill; historical breakdown:
 **Spending less.** The levers, cheapest first:
 
 - **Fewer sites** — `--sites lite` (3 lightweight sites, no databases).
-- **Fewer / cheaper methods** — WebMCP medians are $0.002–$0.017/task;
+- **Fewer / cheaper methods** — WebMCP medians are $0.0011–$0.017/task;
   computer use and DOM + vision carry most of the cost.
 - **Fewer attempts** — `--preset smoke` or `--n 1` instead of the default 3
   (you lose majority voting, so one run decides each task).

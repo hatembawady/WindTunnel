@@ -151,14 +151,13 @@ What bounds the risk:
 - The other **8 tasks are scored by inspecting application state** (orders,
   appointments, invoices, carts). Recall cannot fake a database row — it has to
   be created.
-- **Every attempt's full transcript is published** in the run's `run.json`, so
-  anyone can check whether an agent actually called tools and read pages, or
-  answered blind. This is auditable by a skeptic rather than asserted by us.
+- Published canonical results retain metrics and redacted final answers. Raw transcripts
+  are omitted in v1.2, so this release cannot independently establish which page
+  observations informed an answer.
 
 What actually fixes it: a **held-out task set with unpublished values**, which
 is planned and not yet built. Until it exists, read answer-tier scores as
-retrieval-plus-possible-recall, not retrieval alone. State-verified tasks and
-the published transcripts are what carry weight in the meantime.
+retrieval-plus-possible-recall, not retrieval alone. State-verified tasks provide the stronger evidence in the meantime.
 
 ## 5. Tasks
 
@@ -237,10 +236,18 @@ Practical note: containers boot in minutes, not milliseconds, so the harness
 boots each site once per (site × method) batch and `reset`s between repeats
 rather than rebooting per run.
 
-The canonical board (v1.1) uses Sonnet 5, Opus 5, GPT-5.6 Luna, GPT-5.6 SOL,
-GPT-6 Astra, and Gemini 3.6 Flash. Its 19 configurations produced 2,793
-attempts at a recorded total cost of $281.35 (see the README's [Cost](../README.md#cost) section). Other
+The canonical board (v1.2) uses Sonnet 5, Opus 5, GPT-5.6 Luna, GPT-5.6 SOL,
+GPT-6 Astra, Gemini 3.6 Flash, and Jev + Mercury 2.5. Its 21 configurations produced 3,087
+attempts at a recorded total cost of $281.80 (see the README's [Cost](../README.md#cost) section). Other
 models are a natural thing for submitters to bring.
+
+Jev + Mercury 2.5 adds two frozen setups: `wm-jev-mercury-v3` selects WebMCP tools,
+and `a11y-jev-mercury-ultrafast` operates visible DOM controls without WebMCP.
+Jev (`jev-1.13.0`) selects actions; Mercury (`mercury-2.5`) writes arguments or
+field values and final answers. These are different harnesses, not an isolated
+interface ablation. Task definitions, scoring, and the 600s cap are unchanged.
+The standard CLI does not include these experimental runners; published versions
+and accounting are in [the release provenance](../results/2026-09-18-jev-mercury/PROVENANCE.md).
 
 ### 6.1 Single- vs multi-modal arms
 

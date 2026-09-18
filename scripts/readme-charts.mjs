@@ -32,10 +32,12 @@ const aggregate = (rs, m, webmcp = m.startsWith("wm")) => ({
 const CANON = "canonical";
 const canonRows = loadRows(CANON);
 const MODEL_LABEL = {
+  "typesafe-ai/jev+mercury-2.5": "Jev + Mercury 2.5",
   "claude-sonnet-5": "Sonnet 5", "claude-opus-5": "Opus 5",
   "gpt-5.6-luna": "Luna", "gpt-5.6-sol": "SOL", "gpt-6-astra": "Astra", "gemini-3.6-flash": "Gemini 3.6",
 };
 const ARM_LABEL = {
+  "wm-jev-mercury-v3": "WebMCP", "a11y-jev-mercury-ultrafast": "DOM (ultrafast)",
   "wm-claude": "WebMCP", "wm-gpt": "WebMCP", "wm-gemini": "WebMCP",
   "wm-stagehand-v4": "WebMCP/Stagehand v4", "wm-stagehand-v4-gemini": "WebMCP/Stagehand v4",
   "cu-claude": "CU", "cu-openai": "CU", "cu-gemini": "CU", "code-openai": "code exec",
@@ -46,9 +48,9 @@ const KIND = (arm) => arm.startsWith("wm") ? "webmcp"
 
 // Model-matched pairs: each model's NATIVE WebMCP run against its own
 // computer-use run, so the comparison never crosses models.
-const NATIVE_WM = { "claude-sonnet-5": "wm-claude", "claude-opus-5": "wm-claude",
+const NATIVE_WM = { "typesafe-ai/jev+mercury-2.5": "wm-jev-mercury-v3", "claude-sonnet-5": "wm-claude", "claude-opus-5": "wm-claude",
   "gpt-5.6-luna": "wm-gpt", "gpt-5.6-sol": "wm-gpt", "gpt-6-astra": "wm-gpt", "gemini-3.6-flash": "wm-gemini" };
-const NATIVE_CU = { "claude-sonnet-5": "cu-claude", "claude-opus-5": "cu-claude",
+const NATIVE_CU = { "typesafe-ai/jev+mercury-2.5": "a11y-jev-mercury-ultrafast", "claude-sonnet-5": "cu-claude", "claude-opus-5": "cu-claude",
   "gpt-5.6-luna": "cu-openai", "gpt-5.6-sol": "cu-openai", "gpt-6-astra": "cu-openai", "gemini-3.6-flash": "cu-gemini" };
 // A model mapped above but not yet measured on BOTH arms is skipped, otherwise
 // aggregate([]) puts NaN in the SVG.
@@ -57,7 +59,7 @@ const expansionAgg = Object.keys(NATIVE_WM).filter((model) => has(NATIVE_WM[mode
   const label = MODEL_LABEL[model] ?? model;
   const pick = (arm) => canonRows.filter((r) => r.arm === arm && r.model === model);
   return [
-    aggregate(pick(NATIVE_CU[model]), `${label} \u00b7 CU`, false),
+    aggregate(pick(NATIVE_CU[model]), `${label} \u00b7 ${model.startsWith("typesafe-") ? "page" : "CU"}`, false),
     aggregate(pick(NATIVE_WM[model]), `${label} \u00b7 WebMCP`, true),
   ];
 });
@@ -106,7 +108,7 @@ const THEMES = {
 
 const PANELS = [
   ["Success rate — attempts passed", "success", (v) => v.toFixed(0) + "%", true],
-  ["Median cost / task", "cost", (v) => "$" + v.toFixed(3), false],
+  ["Median cost / task", "cost", (v) => "$" + v.toFixed(v < .01 ? 4 : 3), false],
   ["Median tokens processed / task", "tokens", (v) => Math.round(v).toLocaleString("en-US"), false],
   ["Median agent time / task", "agent", (v) => v.toFixed(1) + "s", false],
 ];
@@ -179,7 +181,7 @@ function leaderboard(themeName) {
 <rect x="${BAR_X}" y="${y + 5}" width="${width.toFixed(1)}" height="18" rx="2" fill="${fill(a)}"/>
 <text x="${SCORE_X}" y="${y + 19}" text-anchor="end" font-weight="700" fill="${t.label}">${a.score.toFixed(1)}</text>
 <text x="${PASS_X}" y="${y + 19}" text-anchor="end" fill="${t.label}">${a.success.toFixed(1)}%</text>
-<text x="${COST_X}" y="${y + 19}" text-anchor="end" fill="${t.label}">$${a.cost.toFixed(3)}</text>
+<text x="${COST_X}" y="${y + 19}" text-anchor="end" fill="${t.label}">$${a.cost.toFixed(a.cost < .01 ? 4 : 3)}</text>
 <text x="${TIME_X}" y="${y + 19}" text-anchor="end" fill="${t.label}">${a.agent.toFixed(1)}s</text>`;
   }).join("\n");
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="system-ui,-apple-system,sans-serif" font-size="13">
@@ -208,11 +210,11 @@ fs.mkdirSync(out, { recursive: true });
 for (const theme of Object.keys(THEMES)) {
   const suffix = theme === "dark" ? "-dark" : "";
   fs.writeFileSync(path.join(out, `model-comparison${suffix}.svg`), panel(theme, expansionAgg, {
-    title: "WindTunnel — model expansion: WebMCP vs. computer use",
+    title: "WindTunnel — WebMCP vs. page operation",
     subtitle: `49 tasks × 8 sites × 3 attempts · 600s per-attempt agent cap · ${canonRows.length.toLocaleString("en-US")} attempts`,
-    otherLabel: "computer use",
-    labelWidth: 142,
-    quadrantWidth: 500,
+    otherLabel: "screenshots / DOM (ultrafast)",
+    labelWidth: 190,
+    quadrantWidth: 548,
     barMax: 238,
   }));
   fs.writeFileSync(path.join(out, `balanced-leaderboard${suffix}.svg`), leaderboard(theme));

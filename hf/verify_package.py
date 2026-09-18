@@ -123,10 +123,10 @@ def check_dimensions() -> str:
         "configurations": len({(row["arm"], row["model"]) for row in attempts}),
         "sites": len({row["site"] for row in attempts}),
     }
-    expected = {"attempts": 2793, "verdicts": 931, "tasks": 49, "configurations": 19, "sites": 8}
+    expected = {"attempts": 3087, "verdicts": 1029, "tasks": 49, "configurations": 21, "sites": 8}
     if counts != expected:
         raise AssertionError(f"dimensions {counts!r} != {expected!r}")
-    if len({(row["configuration"], row["site"], row["task_id"]) for row in verdicts}) != 931:
+    if len({(row["configuration"], row["site"], row["task_id"]) for row in verdicts}) != 1029:
         raise AssertionError("duplicate verdict cell")
     return ", ".join(f"{key}={value}" for key, value in counts.items())
 

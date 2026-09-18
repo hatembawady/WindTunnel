@@ -36,7 +36,7 @@ Omit `--site` and `--task` for all 49 tasks. The default is three attempts per t
 
 ## What is preserved
 
-The files in `source-manifest.json` are copied from the frozen measured cohorts and verified against their original SHA-256 hashes. Only import paths were relocated. The prompts, policy, agent logic, viewport, task hashes, step budgets, 600-second attempt limit and provider prices are preserved. Browser Use's upstream code retains its [MIT license](ultrafast/upstream/LICENSE).
+The files in `source-manifest.json` are copied from the frozen measured cohorts and verified against their original SHA-256 hashes. Import paths were relocated. An optional DeepSeek URL check now compares the parsed hostname; the Mercury configuration does not use that branch. The prompts, policy, agent logic, viewport, task hashes, step budgets, 600-second attempt limit and provider prices are preserved. Browser Use's upstream code retains its [MIT license](ultrafast/upstream/LICENSE).
 
 `run.mjs` is a portable launcher, and `webmcp/arm.mjs` extracts the original WebMCP method. Historical date gates and the recovery supervisor are not part of this launcher. It does not add date hints or automatically retry an entire attempt. It stops for infrastructure/model/accounting flags; each rerun needs a fresh directory. Model responses are checked against `jev-1.13.0` and `mercury-2.5`. Availability and future responses can change.
 

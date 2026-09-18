@@ -1,5 +1,5 @@
 {
-  "description": "Frozen measured agent sources. Only import paths were relocated. The public run.mjs is a new launcher; benchmark results are unchanged.",
+  "description": "Frozen measured agent sources with portable imports. The optional DeepSeek hostname check is hardened; Mercury request behavior is unchanged. The public run.mjs is a new launcher; benchmark results are unchanged.",
   "cohort_configuration_sha256": [
     "8cde0637d5e1c4edb27d0d83497d2e38571bda0c2e0bbd568751f75178fa54bd",
     "35271c3b2ed88df7216f7d9074ed18d75ed420862382bf25169da455afb9e5bb"
@@ -147,8 +147,8 @@
     {
       "file": "experiments/jev/ultrafast/upstream/jev_ultrafast/model.py",
       "source_sha256": "a85ada8458d23642c5c8a4095acf0565e6268f81dcda26f6308942b653e9c9f3",
-      "published_sha256": "a85ada8458d23642c5c8a4095acf0565e6268f81dcda26f6308942b653e9c9f3",
-      "changes": "none"
+      "published_sha256": "651de84298b4db97251ce7e1fd3d8b451c75db3859ced937cf032adb2c6050d5",
+      "changes": "optional DeepSeek URL substring check replaced with exact parsed hostname; unused by measured Mercury configuration"
     },
     {
       "file": "experiments/jev/ultrafast/upstream/jev_ultrafast/questions.py",

@@ -7,7 +7,7 @@ a short Markdown report as its front page.
 configurations × 49 tasks × 3 attempts, consolidated per cell from the source
 runs listed in its [`PROVENANCE.md`](canonical/PROVENANCE.md). Open its
 `explorer.html` for the interactive view; `results.csv` / `run.json` carry
-every attempt's metrics and redacted final answer; raw transcripts are omitted. The original seven-method run
+every attempt's metrics and redacted final answer. The [Jev release](2026-09-18-jev-mercury/PROVENANCE.md) also contains redacted transcripts for all 294 attempts. The original seven-method run
 is [`2026-07-27-reference/`](2026-07-27-reference/).
 
 **The cross-model view is [`model-comparison.md`](model-comparison.md).** It

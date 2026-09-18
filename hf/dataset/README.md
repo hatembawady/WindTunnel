@@ -150,7 +150,7 @@ Jev + Mercury 2.5 solves 49/49 tasks with WebMCP and 25/49 with DOM controls. Th
 
 ## Reproduction and environment
 
-The Jev configurations use separate frozen runners. Their [source and run instructions](https://github.com/nekuda-ai/WindTunnel/tree/main/experiments/jev) and [redacted trace archives](https://github.com/nekuda-ai/WindTunnel/tree/main/results/2026-09-18-jev-mercury) are published in the benchmark repository.
+The Jev configurations use separate frozen runners. Their [source and run instructions](https://github.com/nekuda-ai/WindTunnel/tree/a1a851f303f93fd2cfb39c4939de99935fe701fc/experiments/jev) and [redacted trace archives](https://github.com/nekuda-ai/WindTunnel/tree/a1a851f303f93fd2cfb39c4939de99935fe701fc/results/2026-09-18-jev-mercury) are published in the benchmark repository.
 
 Reading the dataset or scoring answer predicates requires Python 3, PyArrow, and no Docker or provider key.
 

@@ -9,7 +9,7 @@
 
 **Benchmark WebMCP against other methods browser agents use to interact with websites.**
 
-**WebMCP solves 100% of tasks, with 2.5–7.5× faster median execution, 2.9–47.2× lower median cost, and 27–50% higher scores than the median of other methods.**
+**WebMCP solves 100% of tasks, with 2.5–7.5× faster median execution, 3–47× lower median cost, and 27–50% higher scores than the median of other methods.**
 
 [Quick start](#quick-start) · [Results](#results) · [Run data](results/) · [Methodology](docs/SPEC.md) · [Cost](#cost) · [WebMCP spec](https://github.com/webmachinelearning/webmcp)
 

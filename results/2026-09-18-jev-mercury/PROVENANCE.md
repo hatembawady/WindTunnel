@@ -25,4 +25,12 @@ Leaderboard costs use reported token usage at standard estimated prices. Unknown
 - Ultrafast upstream revision: `452c1ad2dd628008f1d5608f28158d76e49e6cc0`.
 - `scripts/publish-jev-results.mjs` checks completed cohorts, checkpoint checksums, configuration hashes, task hashes, versions, and 49 complete three-attempt cells before exporting.
 
-`run.json` and `results.csv` contain measurements and redacted final answers. Browser traces, credentials, private paths, runtime configuration, and working documents are omitted. The canonical task copy is sanitized for the explorer and dataset; executed task definitions are unchanged. These artifacts support metric and answer-score verification, not full trace audits. The experimental runners are not shipped in the standard benchmark CLI.
+`run.json` and `results.csv` contain measurements and redacted final answers. The [runner code](../../experiments/jev/README.md) is published with original and relocated source hashes. It includes both measured agent implementations and a portable launcher; no A/B/C changes are included.
+
+- [WebMCP transcripts](webmcp-traces.jsonl.gz): 147 attempts, 3,782 events.
+- [DOM transcripts](dom-traces.jsonl.gz): 147 attempts, 10,262 events.
+- [Trace manifest](traces-manifest.json): file hashes and redaction policy.
+
+Each compressed JSON Lines record joins to the metrics by `run_id` and includes the transcript, captured Jev request bodies, decision configuration and provider usage. Credentials, session tokens, private IPs and local paths are redacted, including values inside serialized JSON. These are sanitized copies; the original checkpoint hashes identify the private source records, not the public bytes. Working documents and environment files are excluded.
+
+The canonical task copy remains sanitized for the explorer and dataset. Executed tasks, scores and numeric measurements are unchanged. Historical date gates and automatic outage-supervisor recovery are not included in the portable launcher; see its instructions for the exact boundary.

@@ -176,8 +176,8 @@ framework, and turn budget.
   inspects the resulting application state — is the item in the cart, does the
   appointment exist — and records pass or fail, plus what the attempt cost.
 - **Integrity.** Checked values are generated fresh from a seed, state-changing
-  tasks are scored by inspecting the application, and published final answers are redacted. Raw transcripts are omitted from
-  the current release to keep login details out of the artifacts. Memorization risk and its limits:
+  tasks are scored by inspecting the application, and published final answers are redacted. The Jev release includes
+  [redacted transcripts](results/2026-09-18-jev-mercury/PROVENANCE.md); the combined result rows stay compact. Memorization risk and its limits:
   [`docs/SPEC.md`](docs/SPEC.md).
 - **Scorer correction.** Independent review found that the canonical merge had
   been built before corrected predicates were applied. Re-scoring fixed 19
@@ -228,8 +228,8 @@ and Jev + Mercury 2.5. Every configuration uses the same 49 tasks and scoring.
 
 Jev makes decisions; Mercury writes arguments or field values and the final answer.
 The WebMCP and ultrafast page setups use separate frozen harnesses, so this is a
-comparison of complete setups. Their results are published here; their experimental
-runners are not part of the standard CLI. [Versions and accounting](results/2026-09-18-jev-mercury/PROVENANCE.md).
+comparison of complete setups. Their [runner code and run instructions](experiments/jev/README.md) are published separately from the standard CLI.
+[Versions, accounting and redacted transcripts](results/2026-09-18-jev-mercury/PROVENANCE.md).
 
 ## Cost
 

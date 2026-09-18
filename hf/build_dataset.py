@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import gzip
 import json
 import re
 import shutil
@@ -283,6 +284,18 @@ def build_verdicts(raw_rows: list[dict]) -> list[dict]:
 
 
 def build_transcripts(raw_rows: list[dict]) -> list[dict]:
+    traces = {}
+    release = REPO_ROOT / "results" / "2026-09-18-jev-mercury"
+    for name in ("webmcp", "dom"):
+        with gzip.open(release / f"{name}-traces.jsonl.gz", "rt") as handle:
+            for line in handle:
+                item = json.loads(line)
+                if item["run_id"] in traces:
+                    raise ValueError("duplicate Jev transcript run_id")
+                traces[item["run_id"]] = item["transcript"]
+    expected = {r["run_id"] for r in raw_rows if r["arm"] in {"wm-jev-mercury-v3", "a11y-jev-mercury-ultrafast"}}
+    if set(traces) != expected or len(traces) != 294:
+        raise ValueError("Jev transcripts do not match the 294 canonical attempts")
     rows = [{
         "run_id": raw["run_id"],
         "configuration": configuration(raw["arm"], raw["model"]),
@@ -290,7 +303,7 @@ def build_transcripts(raw_rows: list[dict]) -> list[dict]:
         "arm": raw["arm"],
         "model": raw["model"],
         "site": raw["site"],
-        "transcript": json.dumps(raw.get("transcript", []), ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        "transcript": json.dumps(traces.get(raw["run_id"], raw.get("transcript", [])), ensure_ascii=False, sort_keys=True, separators=(",", ":")),
         "final_text": raw.get("final_text", ""),
     } for raw in raw_rows]
     return sorted(rows, key=lambda row: row["run_id"])

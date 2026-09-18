@@ -38,7 +38,7 @@ configs:
 
 # WindTunnel
 
-WindTunnel measures WebMCP—a website exposing its own callable tools—against three screen-driving interface classes: screenshots (computer use), page structure (two variants: the accessibility tree, and DOM plus vision), and code execution (the model writes Playwright code against the page; OpenAI's recommended mode for GPT-6 Astra). The canonical run uses the same 49 tasks on the same eight pinned, self-hosted open-source applications for 21 model/interface configurations, with three attempts per cell and a 600-second per-attempt agent cap.
+WindTunnel measures WebMCP—a website exposing its own callable tools—against three screen-driving interface classes: screenshots (computer use), page structure (accessibility tree, DOM plus vision, and ultrafast DOM controls), and code execution (the model writes Playwright code against the page; OpenAI's recommended mode for GPT-6 Astra). The canonical run uses the same 49 tasks on the same eight pinned, self-hosted open-source applications for 21 model/interface configurations, with three attempts per cell and a 600-second per-attempt agent cap.
 
 **Conflict of interest:** nekuda created WindTunnel and authored the WebMCP reference tool implementations called by the WebMCP arms.
 
@@ -59,7 +59,7 @@ by hand at release; the card text itself is not machine-generated.
 | Model | Interface | Tasks solved | Attempts passed | Turn cap hit | Median cost | Median s |
 |---|---|---:|---:|---:|---:|---:|
 | Jev + Mercury 2.5 | WebMCP | 49/49 | 141/147 | 0 | $0.0011 | 3.2 |
-| Jev + Mercury 2.5 | DOM controls (no WebMCP) | 25/49 | 76/147 | 19 | $0.0008 | 5.4 |
+| Jev + Mercury 2.5 | DOM (ultrafast) | 25/49 | 76/147 | 19 | $0.0008 | 5.4 |
 | GPT-5.6 Luna | native WebMCP | 49/49 | 146/147 | 0 | $0.002 | 5.7 |
 | Gemini 3.6 Flash | WebMCP · Stagehand v4 | 49/49 | 146/147 | 0 | $0.004 | 8.0 |
 | Gemini 3.6 Flash | native WebMCP | 49/49 | 147/147 | 0 | $0.004 | 7.2 |
@@ -89,7 +89,7 @@ The default `attempts` config stays flat and transcript-free so the Hub viewer r
 | `attempts` | 3,087 | one attempt | configuration, task/site, outcome, timing, turns, calls, token accounting, cost, snapshot provenance, stop metadata |
 | `verdicts` | 1,029 | one configuration × site × task cell | majority verdict, pass count, attempt count, source artifact |
 | `tasks` | 49 | one task | prompt, tier, site, JSON predicate, start path, auth flag, per-interface turn budgets, contamination canary |
-| `transcripts` | 3,087 | one attempt | empty transcript array plus redacted `final_text`, keyed by `run_id` |
+| `transcripts` | 3,087 | one attempt | redacted Jev transcripts (294 attempts); empty arrays for other setups; redacted `final_text` for all |
 
 `run_id` joins `attempts` to `transcripts`. `configuration` is the measured arm/model pair. The `predicate` and `transcript` columns are JSON strings so their original nested structure is preserved without making the default config heavy. `success` is the per-attempt predicate result; `solved` is the majority-of-three cell verdict.
 
@@ -99,7 +99,7 @@ The four task tiers are `answer` (1–2 journey steps), `act-short` (3–5), `ac
 
 Each task starts from `start_path` on a freshly reset seeded application. The input is the English `prompt`, including fixture login details where authentication is part of the journey. The expected agent output is a final natural-language answer and, for action tasks, any requested application side effect.
 
-The v1.2 publication omits raw transcripts and redacts fixture passwords from prompts and final answers. Original scores and numerical measurements are preserved.
+The Jev transcript update adds redacted traces for all 294 Jev attempts. Other configurations retain empty transcript arrays here; their archived runs remain in GitHub. Fixture passwords, tokens and private paths are removed. Original scores and numerical measurements are preserved.
 
 Answer predicates check the normalized `final_text` with required substrings, alternative substrings, regular expressions, and forbidden substrings. Probe predicates inspect evaluator-only API, database, or browser state after the agent stops. The agent cannot call those probes. The `score_answers.py` utility scores external `{site, task_id, answer}` records offline; it explicitly skips probe tasks because live application state is unavailable.
 
@@ -150,7 +150,7 @@ Jev + Mercury 2.5 solves 49/49 tasks with WebMCP and 25/49 with DOM controls. Th
 
 ## Reproduction and environment
 
-The Jev configurations use separate frozen experimental runners that are not shipped in the standard CLI. This package publishes their measurements, not turnkey runners.
+The Jev configurations use separate frozen runners. Their [source and run instructions](https://github.com/nekuda-ai/WindTunnel/tree/a1a851f303f93fd2cfb39c4939de99935fe701fc/experiments/jev) and [redacted trace archives](https://github.com/nekuda-ai/WindTunnel/tree/a1a851f303f93fd2cfb39c4939de99935fe701fc/results/2026-09-18-jev-mercury) are published in the benchmark repository.
 
 Reading the dataset or scoring answer predicates requires Python 3, PyArrow, and no Docker or provider key.
 

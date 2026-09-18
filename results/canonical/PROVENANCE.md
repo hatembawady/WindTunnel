@@ -57,6 +57,7 @@ runs, in precedence order (later wins):
 51. 2026-09-06-v11-md8-wm-stagehand-v4-claude-sonnet-5
 52. 2026-09-06-v11-md8-wm-stagehand-v4-gemini-gemini-3.6-flash
 53. 2026-08-20-scorer-corrections
+54. 2026-09-18-jev-mercury
 
 ## Cells per source, by method
 
@@ -64,6 +65,8 @@ An arm marked SPLIT draws cells from more than one source run — legitimate for
 gap-fills, but those cells were measured under that run's harness generation.
 
 ```
+  wm-jev-mercury-v3 × typesafe-ai/jev+mercury-2.5 49×2026-09-18-jev-mercury
+  a11y-jev-mercury-ultrafast × typesafe-ai/jev+mercury-2.5 49×2026-09-18-jev-mercury
   a11y-stagehand × claude-sonnet-5         49×2026-08-19-sonnet5-a11y-full
   a11y-stagehand × gpt-5.6-luna            49×2026-08-19-luna-a11y-full
   code-openai × gpt-6-astra          SPLIT 42×2026-09-05-astra-full  7×2026-09-06-astra-rem-code-openai
@@ -86,3 +89,5 @@ gap-fills, but those cells were measured under that run's harness generation.
 ```
 
 Per-cell sources are in `run.json` (each verdict's `source` field).
+
+Board v1.2 adds two complete Jev + Mercury 2.5 cohorts (294 attempts). All prior scores and numeric metrics are unchanged. Published canonical artifacts now omit transcripts and redact fixture credentials from final answers and task prompts. Original task definitions and scoring are unchanged. See [Jev release provenance](../2026-09-18-jev-mercury/PROVENANCE.md) for versions, accounting, and reproduction limits.

@@ -88,7 +88,7 @@ $HFPY "$HF_DOWNLOAD_DIR/score_answers.py" --verify-corpus
 The expected proof is:
 
 ```text
-EQUIVALENCE	stored=2352 answer_checked=1968 probe_skipped=384 mismatches=0
+EQUIVALENCE	stored=3087 answer_checked=2583 probe_skipped=504 mismatches=0
 ```
 
 Finally open these pages in a browser:

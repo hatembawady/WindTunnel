@@ -1,5 +1,9 @@
 # WindTunnel changelog
 
+## v1.2 - 2026-09-18
+
+Added Jev + Mercury 2.5 with WebMCP (49/49 tasks) and ultrafast DOM controls without WebMCP (25/49). The board now has 21 configurations and 3,087 attempts. Earlier scores are unchanged. Published data omits raw transcripts and redacts fixture credentials.
+
 ## v1.1 — 2026-09-06
 
 **Feedback we received:** the Medusa store's WebMCP tools stopped at `begin_checkout`, so none of the eight WebMCP configurations could complete task `md-8` (guest checkout), while screenshot and code-execution agents could finish it on the page. That made 48/49 the ceiling for WebMCP by construction — a limitation of one demo store's tool surface, not of the approach.

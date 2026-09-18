@@ -1,16 +1,18 @@
 # Model comparison
 
-Two sections: the **current canonical board** (v1.1, regenerated from
+Two sections: the **current canonical board** (v1.2, regenerated from
 `canonical/results.csv`) and a **historical snapshot** of the expansion runs as
 they were measured at the time. Definitions match the README: infrastructure
 rows excluded, success per attempt, tokens are total processed (uncached input
 + cache reads + cache writes + output), time is median agent time. Board
 versions and what changed between them: [`../CHANGELOG.md`](../CHANGELOG.md).
 
-## Current canonical board (v1.1) — paired native arms per model
+## Current canonical board (v1.2) — paired setups per model
 
 | Interface | Model | Attempt success | Tasks solved | Median cost / attempt | Median tokens / attempt | Median agent time |
 |---|---|---:|---:|---:|---:|---:|
+| DOM (ultrafast) (no WebMCP) | Jev + Mercury 2.5 | 51.7% (76/147) | 25/49 | $0.0008 | 13,892 | 5.4s |
+| WebMCP | Jev + Mercury 2.5 | 95.9% (141/147) | 49/49 | $0.0011 | 9,793 | 3.2s |
 | Computer use | GPT-5.6 Luna | 91.2% (134/147) | 45/49 | $0.017 | 20,914 | 18.3s |
 | Computer use | GPT-5.6 SOL | 91.2% (134/147) | 46/49 | $0.063 | 16,235 | 27.3s |
 | Computer use | Gemini 3.6 Flash | 88.4% (130/147) | 43/49 | $0.020 | 23,857 | 33.7s |
@@ -30,12 +32,13 @@ versions and what changed between them: [`../CHANGELOG.md`](../CHANGELOG.md).
 | Computer use | 45/49 | 46/49 | 43/49 | 45/49 | 45/49 |
 | WebMCP | 49/49 | 49/49 | 49/49 | 49/49 | 49/49 |
 
-Code execution (GPT-6 Astra only): 49/49.
+Code execution (GPT-6 Astra only): 49/49. Jev + Mercury 2.5: 49/49 with WebMCP; 25/49 with DOM controls.
 
 ### Tracked canonical cost (current board)
 
-| Model | Native CU + WebMCP tracked cost |
+| Model | Paired setups tracked cost |
 |---|---:|
+| Jev + Mercury 2.5 (DOM controls + WebMCP) | $0.45 |
 | GPT-5.6 Luna | $5.57 |
 | GPT-5.6 SOL | $26.52 |
 | Gemini 3.6 Flash | $6.39 |
@@ -49,10 +52,7 @@ Code execution (GPT-6 Astra only): 49/49.
   Claude Opus 5 pass all 147 attempts, Luna and Astra 146/147, SOL 145/147.
   Until v1.1 the Medusa checkout task capped every WebMCP row at 48/49 by
   construction (see the changelog).
-- GPT-5.6 Luna is the cost winner on WebMCP at $0.002 per median
-  attempt; Astra's WebMCP row costs $0.017 — more per token, with among the
-  lowest token counts on the board (2,575; SOL's 2,573 is the lowest) and a
-  6.3 s median time.
+- Jev + Mercury 2.5 leads the composite score with WebMCP at $0.0011 and 3.2s per median attempt. Its page setup costs less ($0.0008) but solves only 25/49 tasks. These use different harnesses; the comparison does not isolate the interface. Unknown usage and excluded infrastructure costs are listed in the [release provenance](2026-09-18-jev-mercury/PROVENANCE.md).
 - Computer use tops out at 91.8% attempt success (GPT-6 Astra); no
   screenshot configuration solves more than 46/49 tasks. Turn-cap hits on the
   screenshot arms: GPT-5.6 Luna 11, GPT-5.6 SOL 12, Gemini 3.6 Flash 22, Claude Opus 5 27, GPT-6 Astra 11.

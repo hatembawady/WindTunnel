@@ -12,7 +12,6 @@ from pathlib import Path
 
 import pyarrow as pa
 import pyarrow.parquet as pq
-import yaml
 
 
 HF_ROOT = Path(__file__).resolve().parent
@@ -107,7 +106,7 @@ SCHEMAS = {
     "tasks": TASKS_SCHEMA,
     "transcripts": TRANSCRIPTS_SCHEMA,
 }
-EXPECTED_ROWS = {"attempts": 2793, "verdicts": 931, "tasks": 49, "transcripts": 2793}
+EXPECTED_ROWS = {"attempts": 3087, "verdicts": 1029, "tasks": 49, "transcripts": 3087}
 
 
 def nullable(value: str | None) -> str | None:
@@ -142,6 +141,8 @@ def interface(arm: str) -> str:
         return "WebMCP"
     if arm.startswith("cu-"):
         return "computer use"
+    if arm == "a11y-jev-mercury-ultrafast":
+        return "DOM (ultrafast)"
     if arm == "a11y-stagehand":
         return "accessibility tree"
     if arm == "dom-browseruse":
@@ -231,15 +232,10 @@ def resolve_task(task: dict, seed: int = 1) -> dict:
 
 def build_tasks(canonical_pairs: set[tuple[str, str]]) -> list[dict]:
     rows = []
-    for path in sorted((REPO_ROOT / "tasks").glob("*.yaml")):
-        if path.name.startswith("calibration-"):
-            continue
-        document = yaml.safe_load(path.read_text())
-        for raw in document.get("tasks", document if isinstance(document, list) else []):
-            site = raw.get("site", path.stem)
-            if raw.get("excluded") or (site, raw["id"]) not in canonical_pairs:
+    for site, tasks in json.loads((CANONICAL / "tasks.json").read_text()).items():
+        for task in tasks:
+            if (site, task["id"]) not in canonical_pairs:
                 continue
-            task = resolve_task(raw)
             predicate = task["predicate"]
             budgets = task.get("max_steps")
             if isinstance(budgets, int):

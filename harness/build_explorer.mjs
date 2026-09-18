@@ -32,6 +32,7 @@ const SITE_TYPE = (() => {
 })();
 
 const METHOD_LABEL = {
+  "wm-jev-mercury-v3": "WebMCP", "a11y-jev-mercury-ultrafast": "DOM (ultrafast)",
   "wm-claude": "WebMCP · Claude", "wm-gpt": "WebMCP · GPT", "code-openai": "Code execution · GPT",
   "wm-stagehand": "WebMCP · Stagehand", "cu-claude": "Computer use · Claude",
   "cu-openai": "Computer use · GPT", "dom-browseruse": "Browser Use · DOM + screenshot",
@@ -39,6 +40,7 @@ const METHOD_LABEL = {
 };
 const CLASS = (a) => a.startsWith("wm") ? "webmcp" : a.startsWith("cu") ? "cu" : a.startsWith("code") ? "code" : a === "scripted" ? "scripted" : "struct";
 const MODEL_LABEL = {
+  "typesafe-ai/jev+mercury-2.5": "Jev + Mercury 2.5",
   "claude-sonnet-5": "Sonnet 5", "claude-opus-5": "Opus 5", "claude-sonnet-4-6": "Sonnet 4.6",
   "gpt-5.6-luna": "Luna", "gpt-5.6-sol": "SOL", "gpt-6-astra": "Astra", "gpt-5.5": "GPT-5.5", "gemini-3.6-flash": "Gemini 3.6",
 };
@@ -64,7 +66,7 @@ const tok = (r) => (+r.input_tokens || 0) + (+r.cached_tokens || 0) + (+r.cache_
 // attempt, not a missing value; treating it as missing swapped in wall-clock
 // time for five canonical rows.
 const secs = (r) => (r.agent_s == null || r.agent_s === "") ? (+r.wall_clock_s || 0) : +r.agent_s;
-const money = (v) => v == null ? "—" : "$" + v.toFixed(3);
+const money = (v) => v == null ? "—" : "$" + v.toFixed(v < .01 ? 4 : 3);
 const num = (v) => v == null ? "—" : Math.round(v).toLocaleString();
 
 export function loadTasksBySite() {
@@ -160,6 +162,7 @@ export function renderExplorerHTML({ rows: allRows, tasksBySite = {}, runCount =
   // arms from this table while the charts above showed all 19 configurations.
   const GROUPS = [
     { label: "WebMCP", cls: "webmcp", match: (a) => a.startsWith("wm") },
+    { label: "DOM (ultrafast) · ultrafast", cls: "struct", match: (a) => a === "a11y-jev-mercury-ultrafast" },
     { label: "Page structure · a11y", cls: "struct", match: (a) => a === "a11y-stagehand" },
     { label: "DOM + vision (multimodal)", cls: "struct", match: (a) => a === "dom-browseruse" },
     { label: "Screenshots", cls: "cu", match: (a) => a.startsWith("cu") },
@@ -179,25 +182,14 @@ export function renderExplorerHTML({ rows: allRows, tasksBySite = {}, runCount =
       : `<td>${mult(cost, wmCost)} cost · ${mult(tk, wmTok)} tok · ${mult(ms, wmMs)} time</td>`;
     return `<tr class="${g.cls}${g.cls === "webmcp" ? " ref" : ""}"><td>${esc(g.label)}</td><td class="mono">${esc(g.aggs.map((a) => a.m).join(" / "))}</td><td class="mono">${slash(g.aggs, (a) => money(a.cost))}</td><td class="mono">${slash(g.aggs, (a) => num(a.tk))}</td>${vs}</tr>`;
   }).join("");
-  const ratioVs = (val, base) => GROUPS.filter((g) => g.cls !== "webmcp")
-    .map((g) => median(g.aggs.map(val).filter((x) => x != null)) / (base || 1))
-    .filter((x) => Number.isFinite(x) && x > 0);
-  const others = ratioVs((a) => a.cost, wmCost);
-  const tokOthers = ratioVs((a) => a.tk, wmTok);
-  const msOthers = ratioVs((a) => a.ms, wmMs);
-  const range = (xs) => {
-    if (!xs.length) return "—";
-    const lo = Math.round(Math.min(...xs)), hi = Math.round(Math.max(...xs));
-    return lo === hi ? `${lo}×` : `${lo}×–${hi}×`;
-  };
   // Pooled attempt rate (passes ÷ attempts across the group), not a median of
   // per-configuration rates.
   const succOf = (aggs) => { const n = aggs.reduce((s, a) => s + a.n, 0); return n ? aggs.reduce((s, a) => s + a.pass, 0) / n * 100 : null; };
   const wmSucc = succOf(wmAggs);
   const otherSucc = GROUPS.filter((g) => g.cls !== "webmcp").map((g) => succOf(g.aggs)).filter((x) => Number.isFinite(x));
   const succRange = otherSucc.length ? `${Math.round(Math.min(...otherSucc))}%–${Math.round(Math.max(...otherSucc))}%` : "—";
-  const takeaway = wmAggs.length && others.length
-    ? `WebMCP passed <b>${wmSucc.toFixed(1)}%</b> of attempts (vs ${succRange} for the other interfaces) while being <b>${range(others)} cheaper</b>, <b>${range(tokOthers)} lighter</b> (median tokens), and <b>${range(msOthers)} faster</b>.`
+  const takeaway = wmAggs.length && otherSucc.length
+    ? `WebMCP passed <b>${wmSucc.toFixed(1)}%</b> of attempts (vs ${succRange} for the other interfaces) across the configurations shown below.`
     : "";
   // ---- run identity + plain-language "what ran" ----
   const armIds = [...new Set(rows.map((r) => r.arm))];
@@ -253,7 +245,7 @@ export function renderExplorerHTML({ rows: allRows, tasksBySite = {}, runCount =
     ${tierTable}`;
 
   // ---- flat sortable/filterable data table (spreadsheet view) ----
-  const IFACE = (a) => a.startsWith("wm") ? "WebMCP" : a.startsWith("cu") ? "Screenshots" : a === "code-openai" ? "Code execution (Playwright)" : a === "a11y-stagehand" ? "Page structure (a11y)" : a === "dom-browseruse" ? "DOM + vision" : a;
+  const IFACE = (a) => a.startsWith("wm") ? "WebMCP" : a.startsWith("cu") ? "Screenshots" : a === "code-openai" ? "Code execution (Playwright)" : a === "a11y-jev-mercury-ultrafast" ? "DOM (ultrafast)" : a === "a11y-stagehand" ? "Page structure (a11y)" : a === "dom-browseruse" ? "DOM + vision" : a;
   const flatCells = {};
   for (const r of rows) { const k = `${r.site}|${r.task_id}|${cfgKey(r)}`; (flatCells[k] ??= []).push(r); }
   const flat = Object.values(flatCells).map((rs) => {
@@ -279,7 +271,7 @@ export function renderExplorerHTML({ rows: allRows, tasksBySite = {}, runCount =
 var DATA=${JSON.stringify(flat)};
 var sk='site',sd=1,f={site:'',iface:'',tier:'',q:''};
 var body=document.getElementById('dt-body');
-function money(v){return v==null?'—':'$'+Number(v).toFixed(3);}
+function money(v){return v==null?'—':'$'+Number(v).toFixed(v < .01 ? 4 : 3);}
 function e(s){return String(s).replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;';});}
 function render(){
 var rows=DATA.filter(function(r){return (!f.site||r.site===f.site)&&(!f.iface||r.iface===f.iface)&&(!f.tier||r.tier===f.tier)&&(!f.q||(r.site+' '+r.task+' '+r.method+' '+r.type).toLowerCase().indexOf(f.q.toLowerCase())>=0);});

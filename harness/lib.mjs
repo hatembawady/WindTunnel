@@ -67,6 +67,8 @@ export const PRICES = [
   ["gpt-5.5", [5, 30, 0.5, 0]],
   ["computer-use-preview", [1.5, 6, 0.15, 0]],
   ["gemini-3.6-flash", [0.75, 3.75, 0.075, 0]],
+  ["mercury-2.5", [0.04, 0.15, 0.01, 0.02]],
+  ["jev+mercury-2.5", [0.05, 0.20, 0.01, 0.02]],
 ];
 const warnedModels = new Set();
 

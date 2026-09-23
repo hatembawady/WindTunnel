@@ -15,6 +15,7 @@ import { run as runWMStagehandV4, TOOL_VERSION as WM_STAGEHAND_V4_VERSION } from
 import { run as runWMStagehandV4Gemini, TOOL_VERSION as WM_STAGEHAND_V4_GEMINI_VERSION } from "../arms/wm-stagehand-v4-gemini.mjs";
 import { run as runCUGemini, TOOL_VERSION as CU_GEMINI_VERSION } from "../arms/cu-gemini.mjs";
 import { run as runWMGemini, TOOL_VERSION as WM_GEMINI_VERSION } from "../arms/wm-gemini.mjs";
+import { run as runWMJevMercury } from "../arms/wm-jev-mercury.mjs";
 import { bootCapsule } from "./capsule.mjs";
 import { runBatch } from "./run.mjs";
 import { resolveProfile, loadSites } from "./sites.mjs";
@@ -22,6 +23,29 @@ import { loadTaskFile, loadTasks, resolveTask, taskFile } from "./tasks.mjs";
 import { writeReport } from "../scoring/report.mjs";
 import { isInfraRow } from "./lib.mjs";
 import { apiKeyEnvFor } from "../arms/prompts.mjs";
+
+// Auto-load .env file if present
+function loadEnv() {
+  const envPath = path.resolve(process.cwd(), ".env");
+  if (fs.existsSync(envPath)) {
+    try {
+      const lines = fs.readFileSync(envPath, "utf-8").split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eqIdx = trimmed.indexOf("=");
+        if (eqIdx !== -1) {
+          const key = trimmed.slice(0, eqIdx).trim();
+          const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+          if (key && !process.env[key]) {
+            process.env[key] = val;
+          }
+        }
+      }
+    } catch {}
+  }
+}
+loadEnv();
 
 const PRESETS = { smoke: { n: 1 }, lite: { n: 3 }, full: { n: 3 } };
 const ARMS = {
@@ -42,6 +66,24 @@ const ARMS = {
   "wm-stagehand-v4-gemini": { id: "wm-stagehand-v4-gemini", run: runWMStagehandV4Gemini, model: "gemini-3.6-flash", version: WM_STAGEHAND_V4_GEMINI_VERSION, key: "GEMINI_API_KEY", paid: true, webmcp: true },
   "cu-gemini": { id: "cu-gemini", run: runCUGemini, model: "gemini-3.6-flash", version: CU_GEMINI_VERSION, key: "GEMINI_API_KEY", paid: true },
   "wm-gemini": { id: "wm-gemini", run: runWMGemini, model: "gemini-3.6-flash", version: WM_GEMINI_VERSION, key: "GEMINI_API_KEY", paid: true, webmcp: true },
+  "wm-mercury": {
+    id: "wm-mercury",
+    run: runWMJevMercury,
+    model: "mercury-2.5",
+    version: "inception-2.5",
+    key: () => (process.env.MERCURY_API_KEY || process.env.INCEPTION_API_KEY || process.env.UNIFIED_API_KEY || process.env.OPENROUTER_API_KEY || process.env.WT_SIMULATE_MERCURY) ? null : "MERCURY_API_KEY",
+    paid: true,
+    webmcp: true
+  },
+  "wm-jev-mercury": {
+    id: "wm-jev-mercury",
+    run: runWMJevMercury,
+    model: "mercury-2.5",
+    version: "inception-2.5",
+    key: () => (process.env.MERCURY_API_KEY || process.env.INCEPTION_API_KEY || process.env.UNIFIED_API_KEY || process.env.OPENROUTER_API_KEY || process.env.WT_SIMULATE_MERCURY) ? null : "MERCURY_API_KEY",
+    paid: true,
+    webmcp: true
+  },
 };
 
 export const USAGE = `Usage: node harness/cli.mjs [options]

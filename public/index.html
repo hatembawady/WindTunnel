@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury 2.5 - الوكيل الذاتي لتصفح الويب</title>
+  <meta name="description" content="تحدث مع الوكيل الذكي Mercury 2.5 لتنفيذ أي مهمة تصفح في الويب مباشرة أمامك.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-badge">
+          <svg class="brand-sparkle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1 class="nav-title">Mercury 2.5 Web Agent</h1>
+          <p class="nav-tagline">وكيل ويب ذاتي ينفذ أي مهمة تصفح، بحث، مراسلة، أو تفاعل</p>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <div class="status-pill" id="agent-status-pill">
+          <span class="status-indicator"></span>
+          <span id="agent-status-label">جاهز لأي مهمة</span>
+        </div>
+
+        <button class="theme-toggle-btn" id="btn-theme-toggle" title="تبديل المظهر (فاتح / داكن)">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace-container">
+      <!-- Left Column: Chat Conversation -->
+      <section class="chat-section" aria-label="محادثة الوكيل">
+        <div class="chat-header">
+          <div class="header-info">
+            <span class="chat-icon">💬</span>
+            <h2>محادثة الوكيل الذكي</h2>
+          </div>
+          <button class="btn-ghost" id="btn-clear-chat" title="مسح المحادثة">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            مسح
+          </button>
+        </div>
+
+        <!-- Chat Stream -->
+        <div class="chat-scroll" id="chat-stream" role="log">
+          <div class="bubble-row agent-row">
+            <div class="agent-avatar">⚡</div>
+            <div class="bubble-card">
+              <div class="bubble-title">مرحباً بك! أنا Mercury 2.5</div>
+              <p>أنا وكيل متصفح ذاتي متكامل. لست مقيداً بموقع محدد؛ يمكنك أن تطلب مني أي مهمة في الويب:</p>
+              <ul class="features-list">
+                <li>✉️ <strong>إرسال الرسائل وكتابة النماذج</strong> في أي منصة.</li>
+                <li>🔍 <strong>البحث والتصفح العميق</strong> في YouTube أو Google أو Wikipedia.</li>
+                <li>🛒 <strong>التسوق ومقارنة الأسعار</strong> في المتاجر الإلكترونية.</li>
+                <li>📊 <strong>جمع واستخراج البيانات</strong> من الصفحات والجداول.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested Tasks -->
+        <div class="suggestions-bar" id="suggestions-bar">
+          <span class="suggestions-label">أفكار سريعة:</span>
+          <button class="chip" data-task="ادخل على اليوتيوب وابحث عن ahmed nagdy وافتح أول فيديو">
+            🎬 YouTube: ابحث عن ahmed nagdy
+          </button>
+          <button class="chip" data-task="ادخل على موقع جوجل وابحث عن أخبار الذكاء الاصطناعي اليوم">
+            🌐 بحث Google: أخبار الذكاء الاصطناعي
+          </button>
+          <button class="chip" data-task="افتح موقع Hacker News واجلب لي أول 3 مقالات">
+            📰 Hacker News: أهم المقالات
+          </button>
+        </div>
+
+        <!-- Input Bar -->
+        <form class="prompt-box" id="prompt-form">
+          <div class="prompt-inner">
+            <textarea 
+              id="prompt-input" 
+              placeholder="اكتب مهمتك هنا بالتفصيل (مثل: ادخل على موقع كذا وابحث عن...)" 
+              rows="1" 
+              required
+            ></textarea>
+            
+            <div class="prompt-footer">
+              <label class="desktop-toggle" title="فتح نافذة المتصفح الحقيقية أمامك على الشاشة">
+                <input type="checkbox" id="show-desktop-window" checked>
+                <span class="switch-ui"></span>
+                <span>إظهار المتصفح على سطح المكتب</span>
+              </label>
+
+              <div class="action-buttons">
+                <button type="submit" class="btn-primary" id="btn-submit">
+                  <span>إرسال المهمة</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+                <button type="button" class="btn-danger hidden" id="btn-abort">
+                  <span>إيقاف</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Live Browser Viewport -->
+      <section class="browser-section" aria-label="شاشة المتصفح المباشرة">
+        <div class="mock-browser-top">
+          <div class="window-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+
+          <div class="url-input-container">
+            <span class="lock-icon">🔒</span>
+            <input type="text" id="live-url" value="about:blank" readonly>
+            <div class="live-tag">
+              <span class="live-dot"></span>
+              <span>شاشة مباشرة</span>
+            </div>
+          </div>
+
+          <button class="btn-icon" id="btn-reload-screen" title="تحديث الصورة">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+        </div>
+
+        <div class="browser-display">
+          <div class="idle-state" id="screen-idle-state">
+            <div class="idle-illustration">🖥️</div>
+            <h3>شاشة المتصفح المباشرة</h3>
+            <p>عند بدء المهمة، ستشاهد صفحات الويب تتحدث وتتحرك هنا فورياً.</p>
+          </div>
+          <img id="live-screen-img" class="screen-view hidden" alt="Live browser view" />
+        </div>
+
+        <!-- Real-time Agent Log -->
+        <div class="execution-log-drawer">
+          <div class="drawer-top">
+            <div class="drawer-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+              سجل قرارات Mercury 2.5
+            </div>
+            <div class="step-badge" id="step-badge">الخطوة: 0</div>
+          </div>
+          <div class="log-entries" id="log-entries">
+            <div class="log-placeholder">في انتظار إرسال المهمة...</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
